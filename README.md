@@ -4,7 +4,11 @@ Feature flag and configurations management system. It's named by a tentacled cre
 
 ## Requirement
 
-### golang-migrate
+- Go 1.22.5
+- PostgreSQL
+- golang-migrate
+
+### golang-migrate installation
 
 Detail: https://github.com/golang-migrate/migrate/tree/master/cmd/migrate
 
