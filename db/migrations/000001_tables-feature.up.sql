@@ -2,7 +2,9 @@ create table if not exists "feature" (
     id UUID primary key,
     name TEXT not null,
     description TEXT,
-    status INT2 not null default 1
+    status INT2 not null default 1,
+    created_at TIMESTAMPTZ not null default now(),
+    updated_at TIMESTAMPTZ
 );
 
 create table if not exists "strategy_kv" (
