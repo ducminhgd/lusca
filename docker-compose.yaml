@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  api:
+    image: cosmtrek/air
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+
+  postgresql:
+    image: postgres:15.3
+    container_name: postgre-db
+    restart: on-failure
+    networks:
+      - mybridge
+    environment:
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_pw
+      POSTGRES_DB: lusca
+    command: "-c logging_collector=on"
+    volumes:
+      - ~/docker-volumes/postgresql:/var/lib/postgresql
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 80s
+
+networks:
+  myhost:
+    driver: host
+  mybridge:
+    driver: bridge
