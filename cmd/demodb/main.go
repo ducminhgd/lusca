@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"lusca/config"
-	"lusca/internal/models"
-	"lusca/internal/require"
 
+	"github.com/ducminhgd/lusca/config"
+	"github.com/ducminhgd/lusca/internal/models"
+	"github.com/ducminhgd/lusca/internal/require"
 	"github.com/google/uuid"
 	"gorm.io/plugin/dbresolver"
 )
@@ -14,12 +14,11 @@ func main() {
 	var (
 		cfg = config.Load()
 	)
-	dbManager := require.NewDatabaseManager()
-	dbManager.WithSourceDialector(cfg.Databases.Source)
-	if cfg.Databases.UseReplication {
-		dbManager.WithReplicaDialector(cfg.Databases.Replicas[0])
+	dbManager, err := require.NewDatabaseManager(cfg.Databases)
+	if err != nil {
+		panic(err)
 	}
-	db, _ := dbManager.Connect(cfg.Databases, nil)
+	db := dbManager.DB()
 
 	uuidv7, _ := uuid.NewV7()
 	fmt.Println(uuidv7)

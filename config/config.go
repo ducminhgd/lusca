@@ -26,14 +26,14 @@ type APIConfig struct {
 }
 
 type DBConfig struct {
-	UseReplication  bool           `env:"USE_REPLICATION, default=false"`
-	Source          DBAttributes   `env:",prefix=SOURCE_"`
-	Replicas        []DBAttributes `env:",prefix=REPLICAS_"`
-	LogLevel        int            `env:"LOG_LEVEL, default=2"`
-	ConnMaxIdleTime time.Duration  `env:"CONN_MAX_IDLE_TIME, default=300s"`
-	ConnMaxLifeTime time.Duration  `env:"CONN_MAX_LIFE_TIME, default=300s"`
-	MaxIdleConns    int            `env:"MAX_IDLE_CONNS, default=5"`
-	MaxOpenConns    int            `env:"MAX_OPEN_CONNS, default=10"`
+	UseReplication  bool          `env:"USE_REPLICATION, default=false"`
+	Source          DBAttributes  `env:",prefix=SOURCE_"`
+	Replica         DBAttributes  `env:",prefix=REPLICA_"`
+	LogLevel        int           `env:"LOG_LEVEL, default=2"`
+	ConnMaxIdleTime time.Duration `env:"CONN_MAX_IDLE_TIME, default=300s"`
+	ConnMaxLifeTime time.Duration `env:"CONN_MAX_LIFE_TIME, default=300s"`
+	MaxIdleConns    int           `env:"MAX_IDLE_CONNS, default=5"`
+	MaxOpenConns    int           `env:"MAX_OPEN_CONNS, default=10"`
 }
 
 type DBAttributes struct {
