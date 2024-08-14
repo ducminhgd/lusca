@@ -15,7 +15,7 @@ create table if not exists "strategy_kv" (
     key TEXT not null,
     value JSONB
 );
-create index idx_strategy_key_key on "strategy_kv" (key);
+create index idx_strategy_kv_key on "strategy_kv" (key);
 
 create table if not exists "collection" (
     id UUID primary key,
