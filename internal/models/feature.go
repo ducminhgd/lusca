@@ -7,6 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	FEATURE_STATUS_UNKNOWN  = 0
+	FEATURE_STATUS_DISABLED = 1
+	FEATURE_STATUS_ENABLED  = 2
+)
+
 type Feature struct {
 	ID          uuid.UUID `json:"id" gorm:"primaryKey;column:id"`
 	Name        string    `json:"name" gorm:"column:name"`
@@ -28,4 +34,8 @@ func (m *Feature) BeforeCreate(tx *gorm.DB) error {
 
 	m.ID = id
 	return nil
+}
+
+func (m *Feature) IsEnabled() bool {
+	return m.Status == FEATURE_STATUS_ENABLED
 }

@@ -1,10 +1,15 @@
 package require
 
 import (
+	"log"
+	"os"
+	"time"
+
 	gao_db "github.com/ducminhgd/gao/db"
 	"github.com/ducminhgd/lusca/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type DBManager interface {
@@ -27,6 +32,16 @@ func NewDatabaseManager(cfg config.DBConfig) (*gao_db.GORMManager, error) {
 	}
 
 	m, _ := gao_db.NewGORMManager(prm, &gorm.Config{})
+	m.WithLogger(logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             time.Second,                   // Slow SQL threshold
+			LogLevel:                  logger.LogLevel(cfg.LogLevel), // Log level
+			IgnoreRecordNotFoundError: true,                          // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      true,                          // Don't include params in the SQL log
+			Colorful:                  false,                         // Disable color
+		},
+	))
 
 	if cfg.UseReplication {
 		rpl, err := NewPostgresDialector(cfg.Replica)
