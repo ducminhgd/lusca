@@ -79,10 +79,12 @@ func (r *featureRepo) Update(ctx context.Context, m *models.Feature) (*models.Fe
 }
 
 type FeatureEnableQuery struct {
-	FeatureID   uuid.UUID `url:"feature_id" json:"feature_id" default:""`
-	FeatureName string    `url:"feature_name" json:"feature_name" default:""`
-	Key         string    `url:"key" json:"key" default:""`
-	Value       string    `url:"value" json:"value" default:""`
+	FeatureID       uuid.UUID `url:"feature_id" json:"feature_id" default:""`
+	FeatureName     string    `url:"feature_name" json:"feature_name" default:""`
+	Key             string    `url:"key" json:"key" default:""`
+	Value           string    `url:"value" json:"value" default:""`
+	Environment     string    `url:"environment" json:"environment" default:""`
+	CollectionValue string    `url:"collection_value" json:"collection_value" default:""`
 }
 
 func (r *featureRepo) IsEnabled(ctx context.Context, conditions FeatureEnableQuery) bool {
@@ -112,10 +114,26 @@ func (r *featureRepo) IsEnabled(ctx context.Context, conditions FeatureEnableQue
 	// Get Feature's Strategies
 	// FIXME: this cannot run correctly, need to query data in JSON
 	if conditions.Key != "" {
-		r.db.DB().Model(&models.Strategy{}).WithContext(ctx).
+		query = r.db.DB().Model(&models.Strategy{}).WithContext(ctx).
 			Where("feature_id = ?", f.ID).
 			Where(datatypes.JSONQuery("data").HasKey(conditions.Key)).
-			Count(&count)
+			Where(datatypes.JSONQuery("data").HasKey(conditions.Key, conditions.Value))
+
+		if conditions.Environment != "" {
+			query = query.Where(datatypes.JSONArrayQuery("environment").Contains(conditions.Environment))
+		}
+		query.Count(&count)
+		if count == 0 {
+			return false
+		}
+	}
+
+	if conditions.CollectionValue != "" {
+		query = r.db.DB().Model(&models.CollectionDetail{}).WithContext(ctx).
+			Joins("inner join feature_collection on feature_collection.collection_id = collection_detail.collection_id").
+			Where("feature_collection.feature_id = ?", f.ID).
+			Where("collection_detail.value = ?", conditions.CollectionValue)
+		query.Count(&count)
 		if count == 0 {
 			return false
 		}

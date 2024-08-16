@@ -6,6 +6,7 @@ import (
 	"github.com/ducminhgd/gao/db"
 	"github.com/ducminhgd/lusca/internal/models"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -54,39 +55,64 @@ func (r *collectionDetailRepo) GetByCollectionID(ctx context.Context, id uuid.UU
 	return cds, err
 }
 
-type collectionRepo struct {
+type CollectionRepo struct {
 	db *db.GORMManager
 }
 
-func NewCollectionRepo(db *db.GORMManager) *collectionRepo {
-	return &collectionRepo{
+type CollectionQuery struct {
+	Name_Like string `json:"name__like" default:""`
+}
+
+func NewCollectionRepo(db *db.GORMManager) *CollectionRepo {
+	return &CollectionRepo{
 		db: db,
 	}
 }
 
-func (r *collectionRepo) Create(ctx context.Context, m *models.Collection) (*models.Collection, error) {
+func (r *CollectionRepo) Create(ctx context.Context, m *models.Collection) (*models.Collection, error) {
 	err := r.db.DB().WithContext(ctx).Create(&m).Error
 	return m, err
 }
 
-func (r *collectionRepo) Update(ctx context.Context, m *models.Collection) (*models.Collection, error) {
+func (r *CollectionRepo) Update(ctx context.Context, m *models.Collection) (*models.Collection, error) {
 	err := r.db.DB().WithContext(ctx).Model(&models.Collection{}).Where("id = ?", m.ID).Updates(&m).Error
 	return m, err
 }
 
-func (r *collectionRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.Collection, error) {
+func (r *CollectionRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.Collection, error) {
 	var c models.Collection
 	err := r.db.DB().WithContext(ctx).Model(&models.Collection{}).Where("id = ?", id).First(&c).Error
 	return &c, err
 }
 
-func (r *collectionRepo) GetByName(ctx context.Context, name string) (*models.Collection, error) {
+func (r *CollectionRepo) GetByName(ctx context.Context, name string) (*models.Collection, error) {
 	var c models.Collection
 	err := r.db.DB().WithContext(ctx).Model(&models.Collection{}).Where("name = ?", name).First(&c).Error
 	return &c, err
 }
 
-func (r *collectionRepo) LinkFeatureCollection(ctx context.Context, featureID, collectionID uuid.UUID) error {
+func (r *CollectionRepo) GetList(ctx context.Context, conditions CollectionQuery, opts QueryOptions) ([]models.Collection, int64, error) {
+	var (
+		cs    []models.Collection
+		count int64 = 0
+	)
+	q := r.db.DB().WithContext(ctx).Model(&models.Collection{})
+	if conditions.Name_Like != "" {
+		q = q.Where("name like ?", "%"+conditions.Name_Like+"%")
+	}
+	q = q.Session(&gorm.Session{})
+	result := q.Count(&count)
+	if result.Error != nil {
+		return cs, count, result.Error
+	}
+	result = q.Limit(opts.Limit).Offset(opts.Offset).Find(&cs)
+	if result.Error != nil {
+		return cs, count, result.Error
+	}
+	return cs, count, result.Error
+}
+
+func (r *CollectionRepo) LinkFeatureCollection(ctx context.Context, featureID, collectionID uuid.UUID) error {
 	return r.db.DB().WithContext(ctx).Create(&models.FeatureCollection{
 		FeatureID:    featureID,
 		CollectionID: collectionID,

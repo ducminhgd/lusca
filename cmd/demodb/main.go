@@ -17,7 +17,7 @@ func main() {
 		cfg = config.Load()
 	)
 
-	// createSampleData(cfg)
+	createSampleData(cfg)
 	sampleQuery(cfg)
 }
 
@@ -28,9 +28,11 @@ func sampleQuery(cfg config.Config) {
 	}
 	featureRepo := repositories.NewFeatureRepo(dbManager)
 	result := featureRepo.IsEnabled(context.Background(), repositories.FeatureEnableQuery{
-		FeatureName: "feature-1",
-		Key:         "region",
-		Value:       "vn",
+		FeatureName:     "feature-2",
+		Key:             "region",
+		Value:           "vn",
+		Environment:     "production",
+		CollectionValue: "123",
 	})
 	fmt.Println(result)
 }
@@ -42,8 +44,8 @@ func createSampleData(cfg config.Config) {
 	}
 	db := dbManager.DB()
 	f := models.Feature{
-		Name:        "feature-1",
-		Description: "feature-1 description",
+		Name:        "feature-2",
+		Description: "feature-2 description",
 		Status:      2,
 	}
 	db.Clauses(dbresolver.Write).Create(&f)
@@ -56,4 +58,25 @@ func createSampleData(cfg config.Config) {
 	}
 	db.Clauses(dbresolver.Write).Create(&s)
 	fmt.Println(s)
+
+	c := models.Collection{
+		Name:        "collection-2",
+		Description: "collection-2 description",
+	}
+	db.Clauses(dbresolver.Write).Create(&c)
+	fmt.Println(c)
+
+	cd := models.CollectionDetail{
+		CollectionID: c.ID,
+		Value:        "123",
+	}
+	db.Clauses(dbresolver.Write).Create(&cd)
+	fmt.Println(cd)
+
+	fc := models.FeatureCollection{
+		FeatureID:    f.ID,
+		CollectionID: c.ID,
+	}
+	db.Clauses(dbresolver.Write).Create(&fc)
+	fmt.Println(fc)
 }
