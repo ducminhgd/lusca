@@ -36,6 +36,14 @@ func (r *JsonRepsonse) Write(w http.ResponseWriter) {
 	_ = json.NewEncoder(w).Encode(r)
 }
 
+func NewBadRequestResponse() *JsonRepsonse {
+	return &JsonRepsonse{
+		Status:  http.StatusBadRequest,
+		Code:    RESPONSE_CODE__INVALID_REQUEST,
+		Message: "bad request",
+	}
+}
+
 func NewNotFoundErrorResponse() *JsonRepsonse {
 	return &JsonRepsonse{
 		Status:  http.StatusNotFound,

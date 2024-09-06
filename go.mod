@@ -5,7 +5,9 @@ go 1.22.5
 require (
 	github.com/ducminhgd/gao v0.2.1
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/httplog/v2 v2.1.1
 	github.com/google/uuid v1.6.0
+	github.com/onrik/gorm-slog v1.1.2
 	github.com/sethvargo/go-envconfig v1.1.0
 	gorm.io/datatypes v1.2.1
 	gorm.io/driver/postgres v1.5.9

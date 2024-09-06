@@ -33,3 +33,9 @@ create table if not exists "feature_collection" (
     collection_id UUID not null,
     PRIMARY KEY (feature_id, collection_id)
 );
+
+
+-- Test Data
+-- INSERT INTO public.collection (id,"name",description) VALUES ('8a735d82-80cf-4b62-87f8-673a995771bf'::uuid,'test','test collection');
+-- INSERT INTO public.collection_detail (collection_id,value) VALUES ('8a735d82-80cf-4b62-87f8-673a995771bf'::uuid,'user_id_1'), ('8a735d82-80cf-4b62-87f8-673a995771bf'::uuid,'user_id_2');
+

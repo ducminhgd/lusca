@@ -16,20 +16,22 @@ var (
 )
 
 type Config struct {
-	API       APIConfig
-	Databases DBConfig `env:",prefix=DB_"`
+	API        APIConfig `env:",prefix=API_"`
+	Environemt string    `env:"ENV"`
+	Databases  DBConfig  `env:",prefix=DB_"`
 }
 
 type APIConfig struct {
-	Host string `env:"SERVER_HOST, default=0.0.0.0"`
-	Port int    `env:"SERVER_PORT, default=8000"`
+	Host     string `env:"SERVER_HOST, default=0.0.0.0"`
+	Port     int    `env:"SERVER_PORT, default=8000"`
+	LogLevel string `env:"LOG_LEVEL, default=WARN"`
 }
 
 type DBConfig struct {
 	UseReplication  bool          `env:"USE_REPLICATION, default=false"`
 	Source          DBAttributes  `env:",prefix=SOURCE_"`
 	Replica         DBAttributes  `env:",prefix=REPLICA_"`
-	LogLevel        int           `env:"LOG_LEVEL, default=2"`
+	LogLevel        string        `env:"LOG_LEVEL, default=WARN"`
 	ConnMaxIdleTime time.Duration `env:"CONN_MAX_IDLE_TIME, default=300s"`
 	ConnMaxLifeTime time.Duration `env:"CONN_MAX_LIFE_TIME, default=300s"`
 	MaxIdleConns    int           `env:"MAX_IDLE_CONNS, default=5"`

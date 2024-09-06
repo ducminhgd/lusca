@@ -1,4 +1,4 @@
 {
-    "go.gopath": "/Users/terry.gia/.gvm/gos/go1.22.5",
-    "go.goroot": "/Users/terry.gia/.gvm/gos/go1.22.5",
+    "go.gopath": "~/.gvm/gos/go1.22.5",
+    "go.goroot": "~/.gvm/gos/go1.22.5",
 }

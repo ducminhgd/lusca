@@ -6,9 +6,10 @@ import (
 )
 
 type Collection struct {
-	ID          uuid.UUID `json:"id" gorm:"primaryKey;column:id"`
-	Name        string    `json:"name" gorm:"column:name"`
-	Description string    `json:"description" gorm:"column:description"`
+	ID          uuid.UUID          `json:"id" gorm:"primaryKey;column:id"`
+	Name        string             `json:"name" gorm:"column:name"`
+	Description string             `json:"description" gorm:"column:description"`
+	Details     []CollectionDetail `json:"details"`
 }
 
 func (Collection) TableName() string {
@@ -23,6 +24,13 @@ func (m *Collection) BeforeCreate(tx *gorm.DB) error {
 
 	m.ID = id
 	return nil
+}
+
+func (m *Collection) AfterFind(tx *gorm.DB) (err error) {
+	if len(m.Details) == 0 {
+		m.Details = []CollectionDetail{}
+	}
+	return
 }
 
 type CollectionDetail struct {

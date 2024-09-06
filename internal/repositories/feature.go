@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"database/sql"
 	"log/slog"
 
 	"github.com/ducminhgd/gao/db"
@@ -20,60 +21,60 @@ type FeatureQuery struct {
 	Status_In        []int  `json:"status__in"`
 }
 
-type featureRepo struct {
+type FeatureRepo struct {
 	db *db.GORMManager
 }
 
-func NewFeatureRepo(db *db.GORMManager) *featureRepo {
-	return &featureRepo{
+func NewFeatureRepo(db *db.GORMManager) *FeatureRepo {
+	return &FeatureRepo{
 		db: db,
 	}
 }
 
-func (r *featureRepo) GetList(ctx context.Context, conditions FeatureQuery, opts QueryOptions) ([]models.Feature, error) {
+func (r *FeatureRepo) GetList(ctx context.Context, conditions FeatureQuery, opts QueryOptions) ([]models.Feature, error) {
 	var fs []models.Feature
 	q := r.db.DB().WithContext(ctx).Model(&models.Feature{})
 	if conditions.Name != "" {
-		q = q.Where("name = ?", conditions.Name)
+		q = q.Where("name = @name", sql.Named("name", conditions.Name))
 	}
 	if conditions.Name_Like != "" {
-		q = q.Where("name like ?", "%"+conditions.Name_Like+"%")
+		q = q.Where("name like @name__like", sql.Named("name__like", "%"+conditions.Name_Like+"%"))
 	}
 	if conditions.Description != "" {
-		q = q.Where("description = ?", conditions.Description)
+		q = q.Where("description = @description", sql.Named("description", conditions.Description))
 	}
 	if conditions.Description_Like != "" {
-		q = q.Where("description like ?", "%"+conditions.Description_Like+"%")
+		q = q.Where("description like @description__like", sql.Named("description__like", "%"+conditions.Description_Like+"%"))
 	}
 	if conditions.Status != 0 {
-		q = q.Where("status = ?", conditions.Status)
+		q = q.Where("status = @status", sql.Named("status", conditions.Status))
 	}
 	if len(conditions.Status_In) > 0 {
-		q = q.Where("status in (?)", conditions.Status_In)
+		q = q.Where("status in (@status__in)", sql.Named("status__in", conditions.Status_In))
 	}
 	err := q.Order("created_at desc").
 		Limit(opts.Limit).Offset(opts.Offset).Find(&fs).Error
 	return fs, err
 }
 
-func (r *featureRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.Feature, error) {
+func (r *FeatureRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.Feature, error) {
 	var f models.Feature
 	err := r.db.DB().WithContext(ctx).Model(&models.Feature{}).Where("id = ?", id).First(&f).Error
 	return &f, err
 }
 
-func (r *featureRepo) GetByName(ctx context.Context, name string) (*models.Feature, error) {
+func (r *FeatureRepo) GetByName(ctx context.Context, name string) (*models.Feature, error) {
 	var f models.Feature
 	err := r.db.DB().WithContext(ctx).Model(&models.Feature{}).Where("name = ?", name).First(&f).Error
 	return &f, err
 }
 
-func (r *featureRepo) Create(ctx context.Context, m *models.Feature) (*models.Feature, error) {
+func (r *FeatureRepo) Create(ctx context.Context, m *models.Feature) (*models.Feature, error) {
 	err := r.db.DB().WithContext(ctx).Create(&m).Error
 	return m, err
 }
 
-func (r *featureRepo) Update(ctx context.Context, m *models.Feature) (*models.Feature, error) {
+func (r *FeatureRepo) Update(ctx context.Context, m *models.Feature) (*models.Feature, error) {
 	err := r.db.DB().WithContext(ctx).Model(&models.Feature{}).Where("id = ?", m.ID).Updates(&m).Error
 	return m, err
 }
@@ -87,7 +88,7 @@ type FeatureEnableQuery struct {
 	CollectionValue string    `url:"collection_value" json:"collection_value" default:""`
 }
 
-func (r *featureRepo) IsEnabled(ctx context.Context, conditions FeatureEnableQuery) bool {
+func (r *FeatureRepo) IsEnabled(ctx context.Context, conditions FeatureEnableQuery) bool {
 	if conditions.FeatureID == uuid.Nil && conditions.FeatureName == "" {
 		return false
 	}
@@ -95,10 +96,10 @@ func (r *featureRepo) IsEnabled(ctx context.Context, conditions FeatureEnableQue
 	var f models.Feature
 	query := r.db.DB().WithContext(ctx)
 	if conditions.FeatureID != uuid.Nil {
-		query = query.Where("id = ?", conditions.FeatureID)
+		query = query.Where("id = @feature_id", sql.Named("feature_id", conditions.FeatureID))
 	}
 	if conditions.FeatureName != "" {
-		query = query.Where("name = ?", conditions.FeatureName)
+		query = query.Where("name = @name", sql.Named("name", conditions.FeatureName))
 	}
 	err := query.Find(&f).Error
 	if err != nil {
