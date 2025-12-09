@@ -56,7 +56,7 @@ func main() {
 		Handler: apiServer,
 	}
 	// Server run context
-	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+	serverCtx, serverStopFunc := context.WithCancel(context.Background())
 	// Listen for syscall signals for process to interrupt/quit
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -78,7 +78,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		serverStopCtx()
+		serverStopFunc()
 	}()
 
 	// Run the server
